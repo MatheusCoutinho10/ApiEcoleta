@@ -14,6 +14,8 @@ class User extends Authenticatable implements JWTSubject
     //Campo que não aparece quando exibirmos informações do usuário
     protected $hidden = ['password'];
 
+    public $timestamps = false;
+
     public function getJWTIdentifier() {
         return $this->getKey();
     }

@@ -39,6 +39,23 @@ class AuthController extends Controller
                 $newUser->email = $email;
                 $newUser->password = $hash;
                 $newUser->save();
+
+                //Logando o usuário cadastrado
+                $token = auth()->attempt([
+                    'email' => $email,
+                    'password' => $password
+                ]);
+
+                if(!$token) {
+                    $array['error'] = 'Ocorreu um erro!';
+                    return $array;
+                }
+                
+                //Pegando as informações do usuário
+                $info = auth()->user();
+                $info['avatar'] = url('media/avatars/'.$info['avatar']);
+                $array['data'] = $info;
+                $array['token'] = $token;
             }else{
                 $array['error'] = 'E-mail já cadastrado!';
                 return $array;
