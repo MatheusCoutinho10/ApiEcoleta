@@ -67,4 +67,34 @@ class AuthController extends Controller
 
         return $array;
     }
+
+    //Função de Login
+    public function login(Request $request){
+        $array = ['error'=>''];
+
+        //Processo de login
+        //Pegando as informações enviadas pelo usuário
+        $email = $request->input('email');
+        $password = $request->input('password');
+
+        //Efetuando o login
+        $token = auth()->attempt([
+            'email' => $email,
+            'password' => $password
+        ]);
+
+        //Verificando se deu problemas
+        if(!$token){
+            $array['error'] = 'Usuário e/ou senha incorretos!';
+            return $array;
+        }
+
+        //Pegando as informações do usuário
+        $info = auth()->user();
+        $info['avatar'] = url('media/avatars/'.$info['avatar']);
+        $array['data'] = $info;
+        $array['token'] = $token;
+
+        return $array;
+    }
 }
