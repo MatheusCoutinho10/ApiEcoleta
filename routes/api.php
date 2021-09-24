@@ -13,6 +13,9 @@ Route::get('/ping', function() {
     return ['pong' => true];
 });
 
+//Rota de Login não autenticado
+Route::get('/401', [AuthController::class, 'unauthorized'])->name('login');
+
 //Rotas de login
 Route::post('/auth/login', [AuthController::class, 'login']); //Entrar
 Route::post('/auth/logout', [AuthController::class, 'logout']); //Sair
