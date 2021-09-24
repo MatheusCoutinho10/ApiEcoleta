@@ -20,6 +20,7 @@ class CoopController extends Controller
         $this->loggedUser = auth()->user(); //Informações do usuário que está logado
     }
 
+    /*
     public function createRandom(){
         $array = ['error'=>''];
 
@@ -85,6 +86,24 @@ class CoopController extends Controller
                 $newCoopAvail->save();
             }
         }
+
+        return $array;
+    }
+    */
+
+    //Função que lista as Cooperativas
+    public function list(Request $request){
+        $array = ['error' => ''];
+
+        $coops = Coop::all(); //Pegando todas as cooperativas
+
+        //Loop para trocar o avatar para url
+        foreach($coops as $ckey => $cvalue){
+            $coops[$ckey]['avatar'] = url('media/avatars/'.$coops[$ckey]['avatar']);
+        }
+
+        $array['data'] = $coops; //Pegando os dados
+        $array['loc'] = 'São Paulo'; //Localização atual
 
         return $array;
     }

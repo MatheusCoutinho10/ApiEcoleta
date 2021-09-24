@@ -17,7 +17,7 @@ Route::get('/ping', function() {
 Route::get('/401', [AuthController::class, 'unauthorized'])->name('login');
 
 //Rota para gerar Cooperativas Aleatórias
-Route::get('random', [CoopController::class, 'createRandom']);
+/*Route::get('random', [CoopController::class, 'createRandom']); */
 
 //Rotas de login
 Route::post('/auth/login', [AuthController::class, 'login']); //Entrar
