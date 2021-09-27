@@ -91,11 +91,64 @@ class CoopController extends Controller
     }
     */
 
+    //Função para localização
+    private function searchGeo($address){
+        //Pegando a chave
+        $key = env('MAPS_KEY', null);
+
+        $address = urlencode($address);
+
+        //Fazendo a requisição
+        $url = 'https://maps.googleapis.com/maps/api/geocode/json?address='.$address.'&key='.$key;
+
+        //Usando a Curl para iniciar a requisição
+        $ch = curl_init(); // Iniciando a conexão
+        curl_setopt($ch, CURLOPT_URL, $url); //URL
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); //Recebendo a resposta
+        $res = curl_exec($ch);
+        curl_close($ch); //Fechando a conexão
+
+        return json_decode($res, true); //Pegando a string em json
+    }
+
     //Função que lista as Cooperativas
     public function list(Request $request){
         $array = ['error' => ''];
 
-        $coops = Coop::all(); //Pegando todas as cooperativas
+        //Recebendo os dados de localização
+        $lat = $request->input('lat'); //Latitude
+        $lng = $request->input('lng'); //Longitude
+        $city = $request->input('city'); //Cidade
+
+        //Se o usuário mandou o nome da cidade
+        if(!empty($city)){
+            $res = $this->searchGeo($city);
+
+            //Se teve resultado
+            if(count($res['results']) > 0){
+                $lat = $res['results'][0]['geometry']['location']['lat'];
+                $lng = $res['results'][0]['geometry']['location']['lng'];
+            }
+        }elseif(!empty($lat) && !empty($lng)){
+            $res = $this->searchGeo($lat.','.$lng);
+
+            //Verificando se teve resultado
+            if(count($res['results']) > 0){
+                $city = $res['results'][0]['formatted_address'];
+            }
+        }else{
+            $lat = '-23.5630907';
+            $lng = '-46.6682795';
+            $city = 'São Paulo';
+        }
+
+        //Pegando as cooperativas proximas
+        $coops = Coop::select(Coop::raw('*, SQRT(
+            POW(69.1 * (latitude - '.$lat.'),2) +
+            POW(69.1 * ('.$lng.' - longitude) * COS(latitude / 57.3), 2)) AS distance'))
+            ->havingRaw('distance < ?', [15])
+            ->orderBy('distance', 'ASC')
+            ->get();
 
         //Loop para trocar o avatar para url
         foreach($coops as $ckey => $cvalue){
