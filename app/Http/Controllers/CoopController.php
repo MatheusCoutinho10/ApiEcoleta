@@ -119,6 +119,12 @@ class CoopController extends Controller
         $lat = $request->input('lat'); //Latitude
         $lng = $request->input('lng'); //Longitude
         $city = $request->input('city'); //Cidade
+        $offset = $request->input('offset');
+
+        //Se o usuário não mandou o offset
+        if(!$offset){
+            $offset = 0; //Não pula ninguém, começa do zero
+        }
 
         //Se o usuário mandou o nome da cidade
         if(!empty($city)){
@@ -148,6 +154,8 @@ class CoopController extends Controller
             POW(69.1 * ('.$lng.' - longitude) * COS(latitude / 57.3), 2)) AS distance'))
             ->havingRaw('distance < ?', [15])
             ->orderBy('distance', 'ASC')
+            ->offset($offset) //Paginação
+            ->limit(5) //De 5 em 5 Cooperativas
             ->get();
 
         //Loop para trocar o avatar para url
