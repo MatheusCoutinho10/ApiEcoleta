@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 use App\Models\User;
+use App\Models\UserAppointment;
 use App\Models\Coop;
 use App\Models\CoopPhotos;
 use App\Models\CoopTestimonial;
@@ -194,6 +195,29 @@ class CoopController extends Controller
             $coop['testimonials'] = CoopTestimonial::select(['id', 'name', 'rate', 'body'])->where('id_coop', $coop->id)->get();
 
             //Pegando a disponibilidade da Cooperativa
+            $availability = [];
+
+            //Pegando a disponibilidade crua
+            $avails = CoopAvailability::where('id_coop', $coop->id)->get();
+            $availWeekdays = []; //Array com os dias da semana
+            foreach($avails as $item){
+                $availWeekdays[$item['weekday']] = explode(',', $item['hours']);
+            }
+
+            //Pegando os agendamentos dos proximos 20 dias (incluindo hoje)
+            $appointments = [];
+            $appQuery = UserAppointment::where('id_coop', $coop->id)
+                                         ->whereBetween('ap_datetime', [
+                                             date('Y-m-d').' 00:00:00',
+                                             date('Y-m-d', strtotime('+20 days')).' 23:59:59'
+                                         ])
+                                         ->get();
+            
+            foreach($appQuery as $appItem){
+                $appointments[] = $appItem['ap_datetime']; //Todos os agendamentos que a Cooperativa já tem
+            }
+
+            $coop['available'] = $availability; //Preenchendo o array
 
             $array['data'] = $coop;
         }else{
