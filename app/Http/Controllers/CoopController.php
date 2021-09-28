@@ -168,4 +168,39 @@ class CoopController extends Controller
 
         return $array;
     }
+
+    //Pegando um barbeiro
+    public function one($id){
+        $array = ['error' => ''];
+
+        $coop = Coop::find($id);
+
+        //Se achou um barbeiro
+        if($coop){
+            $coop['avatar'] = url('media/avatars/'.$coop['avatar']); //Corrigindo o avatar
+            $coop['favorited'] = false;
+            $coop['photos'] = [];
+            $coop['testimonials'] = [];
+            $coop['available'] = [];
+
+            //Pegando as fotos da Cooperativa
+            $coop['photos'] = CoopPhotos::select(['id', 'url'])->where('id_coop', $coop->id)->get();
+            //Corrigindo a url das fotos
+            foreach($coop['photos'] as $bpkey => $bpvalue){
+                $coop['photos'][$bpkey]['url'] = url('media/uploads/'.$coop['photos'][$bpkey]['url']);
+            }
+
+            //Pegando os depoimentos da Cooperativa
+            $coop['testimonials'] = CoopTestimonial::select(['id', 'name', 'rate', 'body'])->where('id_coop', $coop->id)->get();
+
+            //Pegando a disponibilidade da Cooperativa
+
+            $array['data'] = $coop;
+        }else{
+            $array['error'] = 'Cooperativa não existe!';
+            return $array;
+        }
+
+        return $array;
+    }
 }
