@@ -271,4 +271,36 @@ class CoopController extends Controller
 
         return $array;
     }
+
+    public function setAppointment($id, Request $request){
+        //Array de resposta
+        $array = ['error'=>''];
+
+        $year = intval($request->input('year')); //Ano
+        $month = intval($request->input('month')); //Mês
+        $day = intval($request->input('day')); //Dia
+        $hour = intval($request->input('hour')); //Hora
+
+        //Validação no mês, dia e hora
+        $month = ($month <10) ? '0'.$month : $month; //Se mês for menor que 10, acrescenta o 0 no começo
+        $day = ($day <10) ? '0'.$day : $day; //Se o dia for menor que 10, acrescenta o 0 no começo
+        $hour = ($hour <10) ? '0'.$hour : $hour; //Se a hora for menor que 10, acrescenta o 0 no começo
+
+        //Verificar se a data é real
+        $apDate = $year.'-'.$month.'-'.$day.' '.$hour.':00:00'; //Transformando no padrão
+
+        //Se a data é real
+        if(strtotime($apDate) > 0){
+            
+        }else{
+            $array['error'] = 'Data inválida!';
+        }
+        //Verificar se a Cooperativa já possui agendamento nesse dia e hora
+
+        //Verificar se a Cooperativa atende nesse dia e hora
+
+        //Fazer o agendamento
+
+        return $array;
+    }
 }
