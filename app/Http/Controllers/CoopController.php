@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 
 use App\Models\User;
 use App\Models\UserAppointment;
+use App\Models\UserFavorite;
 use App\Models\Coop;
 use App\Models\CoopPhotos;
 use App\Models\CoopTestimonial;
@@ -184,6 +185,16 @@ class CoopController extends Controller
             $coop['testimonials'] = [];
             $coop['available'] = [];
 
+            //Verificando um favorito
+            $cFavorite = UserFavorite::where('id_user', $this->loggedUser->id)
+                                     ->where('id_coop', $coop->id)
+                                     ->count();
+            
+            //Se Favorite é maior do que 0
+            if($cFavorite > 0){
+                $coop['favorited'] = true;
+            }
+
             //Pegando as fotos da Cooperativa
             $coop['photos'] = CoopPhotos::select(['id', 'url'])->where('id_coop', $coop->id)->get();
             //Corrigindo a url das fotos
@@ -215,6 +226,39 @@ class CoopController extends Controller
             
             foreach($appQuery as $appItem){
                 $appointments[] = $appItem['ap_datetime']; //Todos os agendamentos que a Cooperativa já tem
+            }
+
+            //Gerar disponibilidade real
+            for($q=0;$q<20;$q++){
+                $timeItem = strtotime('+'.$q.' days');
+                $weekday = date('w', $timeItem); //Dia da semana
+                
+                //Se o dia está na lista dos dias disponiveis
+                if(in_array($weekday, array_keys($availWeekdays))){
+                    //Verificando as horas disposiveis
+                    $hours = [];
+
+                    $dayItem = date('Y-m-d', $timeItem);
+
+                    //Indo de hora em hora vendo se tem disponibilidade
+                    foreach($availWeekdays[$weekday] as $hourItem){
+                        $dayFormated = $dayItem.' '.$hourItem.':00';
+
+                        //Verificando se a datetime está disponível
+                        if(!in_array($dayFormated, $appointments)){
+                            //Adicionando as horas disponíveis do dia
+                            $hours[] = $hourItem;
+                        }
+                    }
+                    
+                    //Se eu tenho horários disponíveis naquele dia da semana
+                    if(count($hours) > 0){
+                        $availability[] = [
+                            'date' => $dayItem,
+                            'hours' => $hours
+                        ];
+                    }
+                }
             }
 
             $coop['available'] = $availability; //Preenchendo o array

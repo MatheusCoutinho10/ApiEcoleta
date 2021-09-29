@@ -36,7 +36,7 @@ class CreateAllTables extends Migration
         Schema::create('userappointments', function (Blueprint $table) {
             $table->id();
             $table->integer('id_user');
-            $table->integer('id_barber');
+            $table->integer('id_coop');
             $table->datetime('ap_datetime');
         });
 
