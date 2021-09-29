@@ -291,16 +291,47 @@ class CoopController extends Controller
 
         //Se a data é real
         if(strtotime($apDate) > 0){
-            
+            //Verificar se a Cooperativa já possui agendamento nesse dia e hora
+            $apps = UserAppointment::select()
+                                   ->where('id_coop', $id)
+                                   ->where('ap_datetime', $apDate)
+                                   ->count();
+
+            //Se for igual a 0 não tem agendamento
+            if($apps === 0){
+                //Verificar se a Cooperativa atende nesse dia e hora
+                //Verificando o dia da semana
+                $weekday = date('w', strtotime($apDate)); //Dia da semana dessa data
+                //Se o barbeiro tem registro naquele dia da semana
+                $avail = CoopAvailability::select()
+                                           ->where('id_coop', $id)
+                                           ->where('weekday', $weekday)
+                                           ->first();
+
+                //Verificando se atende nesse dia
+                if($avail){
+                    //Verificar se a Cooperativa atende nessa hora
+                    $hours = explode(',', $avail['hours']); //Lista das horas que ela atende
+
+                    if(in_array($hour.':00', $hours)){
+                        //Fazer o agendamento
+                        $newApp = new UserAppointment();
+                        $newApp->id_user = $this->loggedUser->id; //Usuario logado
+                        $newApp->id_coop = $id; //Cooperativa
+                        $newApp->ap_datetime = $apDate; //Data e hora
+                        $newApp->save(); //Salvando
+                    }else{
+                        $array['error'] = 'A Cooperativa não atende nessa hora!';
+                    }
+                }else{
+                    $array['error'] = 'A Cooperativa não atende nesse dia!';
+                }
+            }else{
+                $array['error'] = 'A Cooperativa já possui agendamento neste dia e hora!';
+            }
         }else{
             $array['error'] = 'Data inválida!';
         }
-        //Verificar se a Cooperativa já possui agendamento nesse dia e hora
-
-        //Verificar se a Cooperativa atende nesse dia e hora
-
-        //Fazer o agendamento
-
         return $array;
     }
 }
