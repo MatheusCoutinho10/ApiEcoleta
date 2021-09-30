@@ -334,4 +334,30 @@ class CoopController extends Controller
         }
         return $array;
     }
+
+    //Função para buscar Cooperativas
+    public function search(Request $request){
+        $array = ['error'=>'', 'list'=>[]];
+
+        $q = $request->input('q');
+
+        //Se a pessoa digitou algo
+        if($q){
+            //Fazendo as buscas
+            $coops = Coop::select()
+                        ->where('name', 'LIKE', '%'.$q.'%')
+                        ->get();
+
+            //Loop para arrumar os avatares
+            foreach($coops as $bkey => $coop){
+                $coops[$bkey]['avatar'] = url('media/avatars/'.$coops[$bkey]['avatar']);
+            }
+            
+            $array['list'] = $coops; //Adicionando cooperativa ao array
+        }else{
+            $aray['error'] = 'Digite algo para buscar!';
+        }
+
+        return $array;
+    }
 }
