@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator; //Importando o validador
 
+use Intervention\Image\Facades\Image; //Importando a biblioteca usada para atualizar os avatares
+
 use App\Models\User;
 use App\Models\UserAppointment;
 use App\Models\UserFavorite;
@@ -163,6 +165,41 @@ class UserController extends Controller
         }
 
         $user->save(); //Salvando
+
+        return $array;
+    }
+
+    //Função para atualizar o avatar do usuário
+    public function updateAvatar(Request $request){
+        $array = ['error'=>''];
+
+        //Regras das imagens
+        $rules = [
+            'avatar' => 'required|image|mimes:png,jpg,jpeg'
+        ];
+
+        $validator = Validator::make($request->all(), $rules); //Aplicando as regras
+
+        //Verificando se deu erro
+        if($validator->fails()){
+            $array['error'] = $validator->messages();
+            return $array;
+        }
+
+        //Se não deu erro, pego o arquivo
+        $avatar = $request->file('avatar');
+
+        $dest = public_path('/media/avatars'); //Pasta de destino
+        $avatarName = md5(time().rand(0,9999)).'.jpg'; //Gerando um nome
+
+        //Mexendo na imagem
+        $img = Image::make($avatar->getRealPath()); //Pegando o arquivo para classe Image
+        $img->fit(300, 300)->save($dest.'/'.$avatarName); //Mudando o tamanho da imagem e salvando no destino
+
+        //Salvando a imagem no usuário
+        $user = User::find($this->loggedUser->id);
+        $user->avatar = $avatarName;
+        $user->save();
 
         return $array;
     }

@@ -28,6 +28,7 @@ Route::post('/auth/refresh', [AuthController::class, 'refresh']); //Atualizar o 
 Route::post('/user', [AuthController::class, 'create']); //Criação de Usuário
 Route::get('/user', [UserController::class, 'read']); //Lendo informações do Usuário
 Route::put('/user', [UserController::class, 'update']); //Atualiza informações do perfil
+Route::post('user/avatar', [UserController::class, 'updateAvatar']); //Atualiza o avatar
 Route::get('user/favorites', [UserController::class, 'getFavorites']); //Pegando os favoritos
 Route::post('user/favorite', [UserController::class, 'toggleFavorite']); //Adicionando favorito
 Route::get('user/appointments', [UserController::class, 'getAppointments']); //Pegando os agendamentos do usuário
