@@ -65,4 +65,26 @@ class UserController extends Controller
 
         return $array;
     }
+
+    //Função para listar os favoritos
+    public function getFavorites(){
+        $array = ['error'=>'','list'=>[]];
+
+        //Pegando a lista
+        $favs = UserFavorite::select()
+                            ->where('id_user', $this->loggedUser->id)
+                            ->get();
+
+        //Verificando se achou algum
+        if($favs){
+            //Looping para pegas as informações de cada uma das cooperativas
+            foreach($favs as $fav){
+                $coop = Coop::find($fav['id_coop']); //Pegando os dados
+                $coop['avatar'] = url('media/avatars/'.$coop['avatar']); //Corrigindo o avatar
+                $array['list'][] = $coop; //Adicionando ao array
+            }
+        }
+
+        return $array;
+    }
 }
