@@ -29,7 +29,7 @@ Route::post('/user', [AuthController::class, 'create']); //Criação de Usuário
 Route::get('/user', [UserController::class, 'read']); //Lendo informações do Usuário
 Route::put('/user', [UserController::class, 'update']); //Atualiza informações do perfil
 Route::get('user/favorites', [UserController::class, 'getFavorites']); //Pegando os favoritos
-Route::post('user/favorite', [UserController::class, 'addFavorite']); //Adicionando favorito
+Route::post('user/favorite', [UserController::class, 'toggleFavorite']); //Adicionando favorito
 Route::get('user/appointments', [UserController::class, 'getAppointments']); //Pegando os agendamentos do usuário
 
 //Rotas da Cooperativa
