@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+use App\Models\UserAppointment;
 use App\Models\UserFavorite;
 use App\Models\Coop;
 
@@ -82,6 +83,35 @@ class UserController extends Controller
                 $coop = Coop::find($fav['id_coop']); //Pegando os dados
                 $coop['avatar'] = url('media/avatars/'.$coop['avatar']); //Corrigindo o avatar
                 $array['list'][] = $coop; //Adicionando ao array
+            }
+        }
+
+        return $array;
+    }
+
+    //Função para listar os agendamentos do usuário
+    public function getAppointments(){
+        $array = ['error'=>'','list'=>[]];
+
+        //Pegando os agendamentos do usuário
+        $apps = UserAppointment::select()
+                               ->where('id_user', $this->loggedUser->id)
+                               ->orderBy('ap_datetime', 'DESC')
+                               ->get();
+
+        //Se ele achou algo
+        if($apps){
+            //Loop para pegar as informações da Cooperativa
+            foreach($apps as $app){
+                $coop = Coop::find($app['id_coop']); //Pegando a cooperativa
+                $coop['avatar'] = url('media/avatars/'.$coop['avatar']); // Arrumando o avatar
+
+                //Adicionando os dados a lista
+                $array['list'][] = [
+                    'id' => $app['id'],
+                    'datetime' => $app['ap_datetime'],
+                    'coop' => $coop
+                ];
             }
         }
 
